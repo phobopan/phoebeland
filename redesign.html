@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Phoebe Pan</title>
+
+<!-- Shantell Sans stands in for your handwriting until your own font exists.
+     Swap it in via the @font-face block below — nothing else changes. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Phoebe's handwriting. 6.5KB. Covers A–Z, a–z, space and . , : ; ' " " " ' '
+   It has NO digits and no hyphen/parens/slash/& — Shantell Sans catches those.
+   Add them in Calligraphr and the fallback (and its network request) can go. */
+@font-face{
+  font-family:'Phoebe Hand';
+  src:url('./fonts/PhoebeHand.woff2') format('woff2'),
+      url('./fonts/PhoebeHand.ttf') format('truetype');
+  font-weight:400; font-display:swap;
+}
+
+:root{
+  --bg:#FFFFFF;
+  --ink:#14140F;
+  --muted:#87877F;
+  --faint:#B6B6AE;
+  --rule:rgba(20,20,15,.10);
+  --rule-strong:rgba(20,20,15,.22);
+
+  --hand:'Phoebe Hand','Shantell Sans',cursive;
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue','PingFang SC',Arial,sans-serif;
+  /* heavy grotesque for the hero statement — same system face oiloil uses */
+  --display:'Helvetica Neue',-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* narrow centred column: reads centred on a wide screen, text left-aligned inside */
+  --gut:clamp(22px,4vw,36px);
+  --max:960px;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gut)}
+.lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- header ---------- */
+.hd{position:fixed;top:0;left:0;right:0;z-index:40;backdrop-filter:blur(10px);
+    background:rgba(255,255,255,.72);border-bottom:1px solid transparent;transition:border-color .3s ease}
+.hd.stuck{border-bottom-color:var(--rule)}
+.hd .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:15px;padding-bottom:15px}
+.hd .mk{font-family:var(--hand);font-size:23px}
+.hd .right{display:flex;gap:clamp(14px,2.4vw,28px)}
+.hd .right a{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:color .25s ease}
+.hd .right a:hover,.hd .right a:focus-visible{color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{padding:min(28vh,230px) 0 clamp(80px,14vh,170px)}
+/* The whole composition — headline plus bird — shrinks to its own width and
+   centres on the page. Text stays left-aligned; what's centred is the block
+   from the text's left edge to the bird's right edge. */
+.hero-inner{width:fit-content;max-width:100%;margin:0 auto}
+.hero .top{display:flex;align-items:flex-end;gap:clamp(20px,4vw,50px);flex-wrap:nowrap}
+.hero h1{margin:0;flex-shrink:0;font-family:var(--display);font-size:clamp(42px,7vw,104px);
+         font-weight:700;line-height:.88;letter-spacing:-.035em}
+.hero h1 span{display:block;overflow:hidden}
+.hero h1 i{display:block;font-style:normal;transform:translateY(105%);
+           animation:rise .95s cubic-bezier(.16,.9,.24,1) forwards}
+.hero h1 span:nth-child(2) i{animation-delay:.09s}
+.hero h1 span:nth-child(3) i{animation-delay:.18s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero .who{margin-top:30px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+           opacity:0;animation:fade .8s ease .7s forwards}
+.hero .who b{font-weight:500;font-size:14px}
+.hero .who .sep{width:16px;height:1px;background:var(--faint)}
+@keyframes fade{to{opacity:1}}
+.cue{margin-top:clamp(56px,11vh,120px);display:inline-flex;align-items:center;gap:9px;
+     opacity:0;animation:fade .8s ease 1s forwards}
+.cue .ar{display:inline-block;animation:bob 2.1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+.bird{width:clamp(110px,13vw,190px);flex-shrink:0;margin-bottom:4px;
+      transform:rotate(var(--tilt,0deg));transform-origin:50% 92%}
+.bird circle.eye{transform:translate(var(--ex,0px),var(--ey,0px))}
+.bird path{fill:none;stroke:var(--ink);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;
+           stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.1s cubic-bezier(.55,.05,.2,1) .35s forwards}
+.bird circle.eye{fill:var(--ink);opacity:0;animation:fade .4s ease 2.1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* ---------- section shell ---------- */
+.sec{position:relative;padding:clamp(70px,13vh,150px) 0}
+.sec-hd{display:flex;align-items:baseline;gap:18px;margin-bottom:clamp(24px,4vh,42px)}
+.sec-hd h2{margin:0;font-family:var(--hand);font-size:clamp(26px,4vw,44px);font-weight:400}
+
+/* ---------- tab bar ---------- */
+.tabs{display:flex;gap:clamp(16px,3vw,34px);flex-wrap:wrap;
+      border-bottom:1px solid var(--rule);margin-bottom:clamp(26px,4vh,46px)}
+.tab{position:relative;padding:0 0 14px;font-family:var(--mono);font-size:11px;
+     letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+     transition:color .25s ease}
+.tab:hover{color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+            background:var(--ink);transform:scaleX(0);transform-origin:left;
+            transition:transform .38s cubic-bezier(.2,.7,.2,1)}
+.tab[aria-selected="true"]::after{transform:scaleX(1)}
+.tab .ct{margin-left:6px;font-size:9.5px;color:var(--faint)}
+
+/* panels: hidden ones are removed from flow, JS-off shows all */
+.panel[hidden]{display:none}
+.panel{animation:panelin .5s cubic-bezier(.2,.7,.2,1)}
+@keyframes panelin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- numbered rows ---------- */
+.rows{border-top:1px solid var(--rule)}
+.r{display:grid;grid-template-columns:52px 1fr auto;gap:clamp(14px,3vw,40px);
+   align-items:start;padding:26px 0;border-bottom:1px solid var(--rule);
+   transition:padding-left .4s cubic-bezier(.2,.7,.2,1)}
+a.r:hover,a.r:focus-visible{padding-left:14px;outline:none}
+.r .n{font-family:var(--mono);font-size:11px;color:var(--faint);padding-top:5px}
+.r .t{font-family:var(--display);font-size:22px;font-weight:400;letter-spacing:-.021em;
+      line-height:1.3;display:inline;
+      background-image:linear-gradient(var(--ink),var(--ink));background-size:0 1px;
+      background-repeat:no-repeat;background-position:0 100%;
+      transition:background-size .45s cubic-bezier(.2,.7,.2,1)}
+a.r:hover .t,a.r:focus-visible .t{background-size:100% 1px}
+.r .d{display:block;margin-top:7px;color:var(--muted);font-size:14px;max-width:62ch}
+.r .au{display:block;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.r .au b{font-weight:500;color:var(--muted)}
+.r .go{font-family:var(--mono);font-size:13px;color:var(--faint);padding-top:5px;
+       transition:transform .35s ease,color .35s ease}
+a.r:hover .go,a.r:focus-visible .go{transform:translate(3px,-3px);color:var(--ink)}
+.r.todo .t{color:var(--muted);font-weight:400}
+.r .when{display:block;margin-top:7px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+/* ---------- about panel ---------- */
+.about{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+       gap:clamp(26px,5vw,64px);align-items:start}
+/* the About panel's rows sit in a narrower column than the full-width
+   lists, so the 22px title breaks mid-phrase — step it down here only */
+.about .r .t{font-size:18px;letter-spacing:-.014em}
+/* whole bio in Phoebe's hand — needs more size and leading than the
+   grotesque to stay comfortable (px, not ch: the font has no "0" to measure) */
+.about .bio{margin:0;font-family:var(--hand);font-size:21px;line-height:1.8;max-width:440px}
+.chips{margin-top:26px;display:flex;flex-wrap:wrap;gap:8px}
+/* three pills, one line: trimmed tracking and padding so the longest
+   ("CS + Regenerative Biology") fits beside the other two */
+.chips span{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+            white-space:nowrap;border:1px solid var(--rule);border-radius:100px;
+            padding:6px 11px;color:var(--muted)}
+.stack h4{margin:0 0 12px;font-family:var(--mono);font-size:10.5px;font-weight:400;
+          letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.stack ul{margin:0 0 26px;padding:0;list-style:none}
+.stack li{padding:6px 0;border-bottom:1px solid var(--rule);font-size:14px}
+
+/* ---------- art ---------- */
+.art{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.art figure{margin:0;overflow:hidden;aspect-ratio:1;background:#F1EFEA}
+.art img{width:100%;height:100%;object-fit:cover;filter:grayscale(1);
+         transition:filter .55s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.art figure:hover img{filter:grayscale(0);transform:scale(1.04)}
+
+/* ---------- foot ---------- */
+.foot{padding:clamp(60px,10vh,110px) 0 46px;border-top:1px solid var(--rule)}
+.foot .big{margin:0 0 30px;font-family:var(--hand);font-size:clamp(24px,4.6vw,50px);line-height:1.15}
+.foot .fine{margin-top:44px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .85s ease,transform .85s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+/* narrow screens: no room beside the headline, so the bird drops below it */
+@media(max-width:1080px){
+  .hero .top{flex-wrap:wrap;flex-direction:column;align-items:flex-start}
+  .bird{margin:22px 0 0}
+}
+@media(max-width:860px){
+  .about{grid-template-columns:1fr}
+  .art{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .r{grid-template-columns:36px 1fr;gap:12px}
+  .r .go{display:none}
+  .hero{padding-top:22vh}
+  .tabs{gap:14px}
+}
+
+/* ---------- quality floor ---------- */
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .hero h1 i{transform:none}
+  .hero .who,.cue{opacity:1}
+  .bird path{stroke-dashoffset:0}
+  .bird circle.eye{opacity:1}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hd" id="hd">
+  <div class="wrap">
+    <a class="mk" href="#top">Phoebe</a>
+    <div class="right">
+      <a href="#index">Index</a>
+      <a href="#elsewhere">Elsewhere</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero wrap" id="top">
+ <div class="hero-inner">
+  <div class="top">
+    <h1>
+      <span><i>Welcome</i></span>
+      <span><i>to</i></span>
+      <span><i>phoebeland.</i></span>
+    </h1>
+
+    <!-- A phoebe is a small flycatcher. One loose stroke, drawn on load. -->
+    <svg class="bird" viewBox="0 0 100 100" aria-label="A phoebe">
+      <path pathLength="1" d="M32 34 C32 25, 42 21, 50 26 C55 29, 57 34, 59 39
+        C69 42, 77 51, 79 62 C80 70, 78 77, 75 83 L92 94 L70 87
+        C59 85, 47 80, 41 70 C36 61, 34 51, 31 45 C29 41, 30 37, 32 34 Z"/>
+      <path pathLength="1" d="M31 37 L14 42 L31 46"/>
+      <path pathLength="1" d="M48 82 L47 93 M58 84 L60 95"/>
+      <path pathLength="1" d="M22 95 H80"/>
+      <circle class="eye" cx="39" cy="35" r="1.9"/>
+    </svg>
+  </div>
+
+  <div class="who">
+    <b>Phoebe Pan</b>
+    <span class="sep"></span>
+    <span class="lab">Builder / Researcher / Student</span>
+  </div>
+
+  <div class="cue lab"><span class="ar">↓</span> Scroll</div>
+ </div>
+</section>
+
+<!-- ====================== 01 — TABBED INDEX ======================
+     Tabs switch the panels below. Every panel is plain markup: to add an
+     entry, copy a .r row. Rows without a link stay <div class="r todo">
+     so they never look like a button that does nothing.
+=============================================================== -->
+<section class="sec" id="index">
+  <div class="wrap">
+    <div class="sec-hd rv"><span class="lab">01</span><h2>Index</h2></div>
+
+    <div class="tabs rv" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-projects" aria-controls="p-projects" aria-selected="true">Projects<span class="ct">3</span></button>
+      <button class="tab" role="tab" id="tab-research" aria-controls="p-research" aria-selected="false">Research<span class="ct">4</span></button>
+      <button class="tab" role="tab" id="tab-writing"  aria-controls="p-writing"  aria-selected="false">Writing<span class="ct">1</span></button>
+      <button class="tab" role="tab" id="tab-art"      aria-controls="p-art"      aria-selected="false">Art<span class="ct">8</span></button>
+      <button class="tab" role="tab" id="tab-about"    aria-controls="p-about"    aria-selected="false">About</button>
+    </div>
+
+    <!-- ---------- PROJECTS ---------- -->
+    <div class="panel rv" role="tabpanel" id="p-projects" aria-labelledby="tab-projects">
+      <div class="rows">
+        <div class="r todo">
+          <span class="n">01</span>
+          <span>
+            <span class="t">Project name</span>
+            <span class="d">One line on what it does and who it's for — the thing it actually does, not what it's built with.</span>
+          </span>
+        </div>
+        <div class="r todo">
+          <span class="n">02</span>
+          <span>
+            <span class="t">Project name</span>
+            <span class="d">One line on what it does and who it's for.</span>
+          </span>
+        </div>
+        <div class="r todo">
+          <span class="n">03</span>
+          <span>
+            <span class="t">Project name</span>
+            <span class="d">One line on what it does and who it's for.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- RESEARCH ---------- -->
+    <div class="panel rv" role="tabpanel" id="p-research" aria-labelledby="tab-research" hidden>
+      <div class="rows">
+        <a class="r" href="https://doi.org/10.3390/atmos16020127" target="_blank" rel="noopener">
+          <span class="n">01</span>
+          <span>
+            <span class="t">Data augmentation strategies for improved PM2.5 forecasting using transformer architectures</span>
+            <span class="au"><b>P. Pan</b>, A. Srirenganathan, C. Yang — Atmosphere, 2025</span>
+          </span>
+          <span class="go">↗</span>
+        </a>
+        <a class="r" href="https://www.tandfonline.com/doi/full/10.1080/15481603.2025.2571244" target="_blank" rel="noopener">
+          <span class="n">02</span>
+          <span>
+            <span class="t">Optimizing GAIN model to improve AOD imputation using MODIS MAIAC data and multi-source data fusion</span>
+            <span class="au">A. Srirenganathan, <b>P. Pan</b>, T. Stover, D. Sun, C. Yang — GIScience &amp; Remote Sensing, 2025</span>
+          </span>
+          <span class="go">↗</span>
+        </a>
+        <a class="r" href="https://agu.confex.com/agu/fm23/meetingapp.cgi/Paper/1373025" target="_blank" rel="noopener">
+          <span class="n">03</span>
+          <span>
+            <span class="t">Spatiotemporal data fusion model for high-resolution satellite AOD and PM2.5 retrieval and downscaling</span>
+            <span class="au">A. Srirenganathan, <b>P. Pan</b>, T. Trefonides — American Geophysical Union, 2023</span>
+          </span>
+          <span class="go">↗</span>
+        </a>
+        <div class="r todo">
+          <span class="n">04</span>
+          <span>
+            <span class="t">Multi-source data fusion for filling gaps in satellite Aerosol Optical Depth using generative models</span>
+            <span class="au">A. Srirenganathan, <b>P. Pan</b> — GeoIndustry, 2024</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- WRITING ---------- -->
+    <div class="panel rv" role="tabpanel" id="p-writing" aria-labelledby="tab-writing" hidden>
+      <div class="rows">
+        <div class="r todo">
+          <span class="n">01</span>
+          <span>
+            <span class="t">On the small museum</span>
+            <span class="d">Why a personal website should feel more like a wunderkammer than a résumé.</span>
+            <span class="when">Apr 18 2026 · 7 min</span>
+          </span>
+        </div>
+      </div>
+      <p style="margin-top:28px;color:var(--muted);font-size:14px">
+        <em style="font-family:var(--hand);font-style:normal">the phoebeland letter</em> —
+        a quiet correspondence, sent occasionally.
+      </p>
+    </div>
+
+    <!-- ---------- ART ---------- -->
+    <div class="panel rv" role="tabpanel" id="p-art" aria-labelledby="tab-art" hidden>
+      <div class="art">
+        <figure><img src="artwork/Brewing.jpg" alt="Brewing" loading="lazy"/></figure>
+        <figure><img src="artwork/OFF.jpg" alt="OFF" loading="lazy"/></figure>
+        <figure><img src="artwork/Journey.jpg" alt="Journey" loading="lazy"/></figure>
+        <figure><img src="artwork/DarkSideMoon.jpg" alt="Dark Side of the Moon" loading="lazy"/></figure>
+        <figure><img src="artwork/TwoBestFriends.jpg" alt="Two Best Friends" loading="lazy"/></figure>
+        <figure><img src="artwork/rose%20tinted%20glasses.png" alt="Rose Tinted Glasses" loading="lazy"/></figure>
+        <figure><img src="artwork/RaiseMeUp.jpg" alt="Raise Me Up" loading="lazy"/></figure>
+        <figure><img src="artwork/Cheese.jpg" alt="Cheese" loading="lazy"/></figure>
+      </div>
+    </div>
+
+    <!-- ---------- ABOUT ---------- -->
+    <div class="panel rv" role="tabpanel" id="p-about" aria-labelledby="tab-about" hidden>
+      <div class="about">
+        <div>
+          <!-- Set entirely in Phoebe's hand. Avoid hyphens, digits and
+               ( ) / & here — the font has no glyphs for them yet and they
+               would silently drop to the fallback mid-sentence. -->
+          <p class="bio">
+            I study computer science and regenerative biology at Harvard. I've published
+            on machine learning for atmospheric data, work on AI operations at a young
+            company, and look at startups for a student fund. I build small tools when
+            something annoys me enough to fix it.
+          </p>
+          <div class="chips">
+            <span>Cambridge, MA</span>
+            <span>Harvard '29</span>
+            <span>CS + Regenerative Biology</span>
+          </div>
+
+          <div class="rows" style="margin-top:44px">
+            <div class="r todo">
+              <span class="n">01</span>
+              <span><span class="t">Analyst — Harvard Undergraduate VCG</span>
+              <span class="when">Feb 2026 — now · Cambridge, MA</span></span>
+            </div>
+            <div class="r todo">
+              <span class="n">02</span>
+              <span><span class="t">Co-director — Harvard Biotech Club</span>
+              <span class="when">Sep 2025 — now · Cambridge, MA</span></span>
+            </div>
+            <div class="r todo">
+              <span class="n">03</span>
+              <span><span class="t">Operations &amp; AI Solutions — Phia</span>
+              <span class="when">Dec 2025 — Mar 2026 · Remote</span></span>
+            </div>
+            <div class="r todo">
+              <span class="n">04</span>
+              <span><span class="t">Research Intern — George Mason University</span>
+              <span class="when">2022 — 2025 · Fairfax, VA</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <h4>Thinking about</h4>
+          <ul>
+            <li>Aging and longevity</li>
+            <li>Agentic AI</li>
+            <li>The colour silver</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 02 — ELSEWHERE ======================= -->
+<section class="sec" id="elsewhere">
+  <div class="wrap">
+    <div class="sec-hd rv"><span class="lab">02</span><h2>Find me elsewhere</h2></div>
+    <div class="rows rv">
+      <a class="r" href="mailto:phoebepan@college.harvard.edu">
+        <span class="n">01</span>
+        <span><span class="t">Email</span><span class="d">phoebepan@college.harvard.edu</span></span>
+        <span class="go">→</span>
+      </a>
+      <a class="r" href="https://github.com/phobopan" target="_blank" rel="noopener">
+        <span class="n">02</span>
+        <span><span class="t">GitHub</span><span class="d">@phobopan</span></span>
+        <span class="go">↗</span>
+      </a>
+      <a class="r" href="https://linkedin.com/in/phoebe-pan" target="_blank" rel="noopener">
+        <span class="n">03</span>
+        <span><span class="t">LinkedIn</span><span class="d">phoebe-pan</span></span>
+        <span class="go">↗</span>
+      </a>
+      <a class="r" href="https://instagram.com/phobopan" target="_blank" rel="noopener">
+        <span class="n">04</span>
+        <span><span class="t">Instagram</span><span class="d">@phobopan</span></span>
+        <span class="go">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot wrap">
+  <p class="big">Say hello.</p>
+  <a class="lab" href="mailto:phoebepan@college.harvard.edu" style="font-size:12px">phoebepan@college.harvard.edu →</a>
+  <div class="fine">
+    <span class="lab">© 2026 Phoebe Pan</span>
+    <span class="lab">Cambridge, MA</span>
+  </div>
+</footer>
+
+<script>
+/* header hairline once scrolled */
+(function(){
+  var hd=document.getElementById('hd');
+  var on=function(){ hd.classList.toggle('stuck', window.scrollY>10); };
+  on(); addEventListener('scroll',on,{passive:true});
+})();
+
+/* tabs — click + arrow keys, ARIA kept in sync */
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  if(!tabs.length) return;
+  function select(t){
+    tabs.forEach(function(x){
+      var on = x===t;
+      x.setAttribute('aria-selected', on?'true':'false');
+      x.tabIndex = on?0:-1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function(t,i){
+    t.tabIndex = t.getAttribute('aria-selected')==='true'?0:-1;
+    t.addEventListener('click',function(){ select(t); });
+    t.addEventListener('keydown',function(e){
+      var d = e.key==='ArrowRight'?1 : e.key==='ArrowLeft'?-1 : 0;
+      if(!d) return;
+      e.preventDefault();
+      var n=tabs[(i+d+tabs.length)%tabs.length];
+      select(n); n.focus();
+    });
+  });
+})();
+
+/* Bird leans toward the cursor.
+   Follows oil-motion's runtime rules without any of its video pipeline:
+   normalise the input, damp toward a target rather than snapping, cap the
+   speed, write at most once per frame and only when the value changed,
+   and stop the loop entirely when the bird is off-screen. */
+(function(){
+  var svg=document.querySelector('.bird');
+  if(!svg || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var MAX_TILT=5, MAX_EYE=1.7, EASE=.09, MAX_STEP=.9;
+  var tTilt=0,tEx=0,tEy=0, tilt=0,ex=0,ey=0;
+  var lastT=null,lastE=null, running=false, onScreen=true;
+
+  function damp(cur,target){
+    var d=(target-cur)*EASE;
+    if(d> MAX_STEP) d= MAX_STEP;
+    if(d<-MAX_STEP) d=-MAX_STEP;
+    return cur+d;
+  }
+
+  function frame(){
+    tilt=damp(tilt,tTilt); ex=damp(ex,tEx); ey=damp(ey,tEy);
+    var rt=Math.round(tilt*100)/100, re=Math.round(ex*100)/100+'|'+Math.round(ey*100)/100;
+    if(rt!==lastT){ svg.style.setProperty('--tilt',rt+'deg'); lastT=rt; }
+    if(re!==lastE){
+      svg.style.setProperty('--ex',(Math.round(ex*100)/100)+'px');
+      svg.style.setProperty('--ey',(Math.round(ey*100)/100)+'px');
+      lastE=re;
+    }
+    var settled=Math.abs(tilt-tTilt)<.01 && Math.abs(ex-tEx)<.01 && Math.abs(ey-tEy)<.01;
+    if(settled || !onScreen){ running=false; return; }
+    requestAnimationFrame(frame);
+  }
+  function kick(){ if(!running && onScreen){ running=true; requestAnimationFrame(frame); } }
+
+  addEventListener('pointermove',function(e){
+    if(!onScreen) return;
+    /* recompute each move: scroll and layout shift the bird, so a stale
+       rect would map the cursor to the wrong side */
+    var r=svg.getBoundingClientRect();
+    var dx=(e.clientX-(r.left+r.width/2))/innerWidth;
+    var dy=(e.clientY-(r.top+r.height/2))/innerHeight;
+    tTilt=Math.max(-1,Math.min(1,dx*2))*MAX_TILT;
+    tEx=Math.max(-1,Math.min(1,dx*2.4))*MAX_EYE;
+    tEy=Math.max(-1,Math.min(1,dy*2.4))*MAX_EYE;
+    kick();
+  },{passive:true});
+
+  addEventListener('pointerleave',function(){ tTilt=tEx=tEy=0; kick(); });
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){
+      onScreen=en[0].isIntersecting;
+      if(onScreen) kick();
+    },{threshold:0}).observe(svg);
+  }
+})();
+
+/* reveal on scroll — fails open so content is never stuck invisible */
+(function(){
+  var els=document.querySelectorAll('.rv');
+  var show=function(){ els.forEach(function(e){e.classList.add('in')}); };
+  if(!('IntersectionObserver' in window) ||
+     matchMedia('(prefers-reduced-motion: reduce)').matches){ show(); return; }
+  var io=new IntersectionObserver(function(en){
+    en.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{rootMargin:'0px 0px -10% 0px',threshold:.04});
+  els.forEach(function(e){io.observe(e)});
+  addEventListener('load',function(){ setTimeout(show,2500); });
+})();
+</script>
+</body>
+</html>

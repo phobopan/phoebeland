@@ -265,8 +265,8 @@
     z-index: 1;
     pointer-events: none;
     opacity: 0.7;
-    transform: translate(var(--dx, 0px), var(--dy, 0px));
-    transition: transform .35s cubic-bezier(.2,.8,.2,1);
+    transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0);
+    will-change: transform;
   }
   /* The lace frame is FIXED to the viewport — content scrolls behind it on
      every section. z-index sits above page content (sections default to 0,
@@ -1070,7 +1070,375 @@
     .hero-footer { grid-template-columns: 1fr 1fr; }
     .scroll-cue { display:none; }
   }
+
+  /* ===== Newsletter invitation popup — framed like an invitation, with the
+     same translucent cream lace as the site borders (uses #lace-h / #lace-v
+     symbols defined in .lace-frame). Top + bottom lace deliberately extend
+     past the card edges so they read as "cut" by the frame, matching how the
+     site lace is cut by the chrome bar at the top of the viewport. */
+  .invite-overlay {
+    position: fixed; inset: 0; z-index: 99998;
+    /* Spotlight: clear near the centre (popup reads against the page) and
+       gradually darker toward the edges, so attention focuses on the
+       invitation without blurring or hiding the rest of the site. */
+    background: radial-gradient(
+      ellipse at center,
+      rgba(8, 4, 6, 0) 0%,
+      rgba(8, 4, 6, 0.08) 28%,
+      rgba(8, 4, 6, 0.38) 65%,
+      rgba(8, 4, 6, 0.6) 100%
+    );
+    display: flex; align-items: center; justify-content: center;
+    padding: 64px 32px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .55s ease;
+  }
+  .invite-overlay.open { opacity: 1; pointer-events: auto; }
+  .invite-card {
+    position: relative;
+    width: min(500px, 92vw);
+    height: min(660px, 88vh);
+    background: rgba(20, 8, 12, 0.78);
+    border-radius: 50% / 50%;
+    transform: scale(.96) translateY(14px);
+    transition: transform .55s cubic-bezier(.2, 1.2, .3, 1);
+    /* Blur whatever sits behind this oval so the text inside reads cleanly
+       against the velvet/mesh/lace textures of the page. Border-radius
+       clips the blurred region to the ellipse shape — only the card area
+       is blurred, the rest of the page is untouched. */
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+    /* Two-layer glow: warm cream halo (matches the lace) + dark drop shadow */
+    box-shadow:
+      0 0 80px rgba(244, 228, 216, 0.10),
+      0 30px 60px rgba(0, 0, 0, 0.5);
+  }
+  .invite-overlay.open .invite-card { transform: scale(1) translateY(0); }
+  /* Lace ring: tiles arranged around the ellipse perimeter, each rotated to be
+     tangent to the curve so the rim faces outward. Built by buildLaceRing()
+     in JS. overflow:visible so tile bodies can spill past the ellipse. */
+  .invite-lace-ring {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .invite-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 110px 90px;
+    color: var(--ink);
+  }
+  .invite-eyebrow {
+    font-family: var(--mono); font-size: 8px; text-transform: uppercase; letter-spacing: 0.32em;
+    opacity: 0.55; margin-bottom: 18px;
+  }
+  .invite-title {
+    font-family: var(--display); font-style: normal; font-weight: 400;
+    font-size: clamp(24px, 4.4vw, 38px); line-height: 1.02;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .invite-title em { font-style: italic; }
+  .invite-body {
+    font-family: var(--display); font-style: italic;
+    font-size: clamp(11px, 1.3vw, 13px);
+    line-height: 1.5; opacity: 0.78;
+    margin: 0 0 22px;
+  }
+  .invite-form {
+    display: flex; flex-direction: column; gap: 10px;
+    width: 100%; max-width: 220px;
+  }
+  .invite-form input[type="email"] {
+    font-family: var(--mono); font-size: 11px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 0;
+    text-align: center;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .invite-form input[type="email"]:focus { border-color: var(--accent); }
+  .invite-form input::placeholder { color: var(--ink-soft); opacity: 0.4; }
+  .invite-form button {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.22em;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background .2s, color .2s, border-color .2s;
+    margin-top: 4px;
+  }
+  .invite-form button:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .invite-status {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    margin-top: 16px; min-height: 12px; opacity: 0;
+    transition: opacity .3s;
+  }
+  .invite-status.show { opacity: 0.7; }
+  .invite-status.error { color: var(--accent); opacity: 1; }
+  .invite-rsvp {
+    font-family: var(--mono); font-size: 8px; text-transform: uppercase; letter-spacing: 0.32em;
+    opacity: 0.5; margin: 2px 0 16px;
+  }
+  .invite-close {
+    position: absolute; top: -42px; right: -4px; z-index: 5;
+    background: transparent; border: none;
+    color: var(--ink); font-size: 28px; line-height: 1;
+    cursor: pointer; opacity: 0.7;
+    transition: opacity .2s, transform .2s;
+    padding: 6px 10px;
+    font-family: var(--display);
+  }
+  .invite-close:hover { opacity: 1; transform: rotate(90deg); }
+  @media (max-width: 520px) {
+    .invite-content { padding: 88px 50px; }
+    .invite-title { font-size: 28px; }
+  }
+
+  /* ===== Writing section — 2-column "desk" layout =====
+     Left column: small newsletter envelope (clickable) that reopens the
+     lace invitation popup. Right column: the published article list.
+     A dashed vertical rule separates them, suggesting one continuous
+     correspondence space. On mobile the columns stack and the rule
+     becomes horizontal. */
+  .writing-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 60px;
+    padding: 0 var(--side-pad);
+    align-items: start;
+  }
+  .writing-mail {
+    text-align: center;
+    position: sticky;
+    top: 130px;
+    padding: 14px 40px 8px 0;
+    border-right: 1px dashed var(--rule);
+  }
+  .writing-list-eyebrow {
+    font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.32em;
+    opacity: 0.45;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 900px) {
+    .writing-grid { grid-template-columns: 1fr; gap: 56px; }
+    .writing-mail {
+      position: static;
+      padding: 14px 0 50px;
+      border-right: none;
+      border-bottom: 1px dashed var(--rule);
+    }
+  }
+  .env-eyebrow {
+    font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.32em;
+    opacity: 0.55; margin-bottom: 12px;
+  }
+  .env-title {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(22px, 2.6vw, 28px); line-height: 1.1;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+  .env-title em { font-style: italic; }
+  .env-blurb {
+    font-family: var(--display); font-style: italic;
+    font-size: 14px; line-height: 1.45;
+    opacity: 0.72;
+    margin: 0 0 26px;
+  }
+  /* Envelope — clickable trigger for the newsletter popup. Hover lifts the
+     flap a touch; clicking opens the flap fully and fades the wax seal,
+     then triggers the popup just after the flap animation completes. */
+  .envelope {
+    position: relative;
+    width: 180px; height: 118px;
+    background: linear-gradient(180deg, rgba(244,228,216,0.18), rgba(244,228,216,0.10));
+    border: 1px solid rgba(244,228,216,0.45);
+    cursor: pointer;
+    margin: 0 auto 14px;
+    padding: 0;
+    display: block;
+    perspective: 700px;
+    box-shadow: inset 0 -3px 8px rgba(0,0,0,0.22), 0 5px 18px rgba(0,0,0,0.16);
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .envelope:hover {
+    transform: translateY(-3px);
+    box-shadow: inset 0 -3px 8px rgba(0,0,0,0.22), 0 12px 28px rgba(0,0,0,0.26);
+  }
+  .envelope:focus-visible { outline: 1px solid var(--accent); outline-offset: 6px; }
+  .env-flap {
+    position: absolute;
+    top: -1px; left: -1px;
+    width: calc(100% + 2px); height: 60%;
+    background: linear-gradient(180deg, rgba(244,228,216,0.24), rgba(244,228,216,0.14));
+    border: 1px solid rgba(244,228,216,0.48);
+    border-bottom: none;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: 50% 0;
+    transform: rotateX(0);
+    transition: transform .55s cubic-bezier(.4, 0, .2, 1);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .envelope:hover .env-flap { transform: rotateX(-14deg); }
+  .envelope.opening .env-flap { transform: rotateX(-178deg); }
+  .env-seal {
+    position: absolute;
+    top: 56%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px; height: 26px;
+    background: var(--accent);
+    border-radius: 50%;
+    z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(0,0,0,0.5);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 15px; line-height: 1;
+    box-shadow:
+      0 2px 5px rgba(0,0,0,0.35),
+      inset 0 1px 1px rgba(255,255,255,0.28),
+      inset 0 -1px 2px rgba(0,0,0,0.22);
+    transition: transform .3s, opacity .35s;
+    pointer-events: none;
+  }
+  .envelope:hover .env-seal { transform: translate(-50%, -50%) scale(1.08); }
+  .envelope.opening .env-seal {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+    transition-duration: .25s;
+  }
+  .env-sr { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .env-cta {
+    font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em;
+    opacity: 0.5;
+    margin: 0;
+  }
+
+  /* ===== Article reader overlay ===== */
+  .reader {
+    position: fixed; inset: 0; z-index: 99996;
+    background: var(--bg);
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+    overflow: hidden;
+  }
+  .reader.open { opacity: 1; pointer-events: auto; }
+  .reader-scroll {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 90px clamp(24px, 6vw, 80px) 140px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .reader-article {
+    max-width: 680px; margin: 0 auto;
+    color: var(--ink);
+    transform: translateY(24px);
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.2,.8,.2,1) .08s, opacity .55s ease .08s;
+  }
+  .reader.open .reader-article { transform: translateY(0); opacity: 1; }
+  .reader-back {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+    opacity: 0.6;
+    margin-bottom: 80px;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+    transition: opacity .2s, border-color .2s, color .2s;
+  }
+  .reader-back:hover { opacity: 1; border-color: var(--accent); color: var(--accent); }
+  .reader-meta {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+    opacity: 0.55;
+    margin-bottom: 24px;
+  }
+  .reader-title {
+    font-family: var(--display); font-style: italic; font-weight: 400;
+    font-size: clamp(40px, 6.5vw, 76px);
+    line-height: 1.02; letter-spacing: -0.018em;
+    margin: 0 0 22px;
+  }
+  .reader-dek {
+    font-family: var(--display); font-style: italic;
+    font-size: clamp(18px, 2.1vw, 22px);
+    line-height: 1.45; opacity: 0.78;
+    margin: 0 0 56px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .reader-body {
+    font-family: var(--serif);
+    font-size: 18px; line-height: 1.7;
+    color: var(--ink);
+  }
+  .reader-body p { margin: 0 0 1.4em; }
+  .reader-body p:first-of-type::first-letter {
+    font-family: var(--display); font-style: italic;
+    font-size: 4.6em; line-height: 0.92;
+    float: left;
+    padding: 0.04em 0.1em 0 0;
+    color: var(--accent);
+  }
+  .reader-body em, .reader-body i { font-style: italic; }
+  .reader-body blockquote {
+    font-family: var(--display); font-style: italic;
+    font-size: 22px; line-height: 1.4;
+    margin: 1.6em 0; padding: 0 0 0 28px;
+    border-left: 1px solid var(--rule);
+    opacity: 0.85;
+  }
+  .reader-body hr {
+    border: none;
+    text-align: center;
+    margin: 2.4em 0;
+    color: var(--ink); opacity: 0.4;
+  }
+  .reader-body hr::before {
+    content: '✱  ✱  ✱';
+    font-family: var(--display);
+    letter-spacing: 0.4em;
+  }
+  .reader-foot {
+    margin-top: 80px; padding-top: 40px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+    opacity: 0.55;
+    text-align: center;
+  }
+  .reader-close {
+    position: fixed; top: 24px; right: 28px; z-index: 2;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    font-size: 18px; line-height: 1;
+    cursor: pointer; opacity: 0.75;
+    transition: opacity .2s, border-color .2s, color .2s, transform .2s;
+    font-family: var(--display);
+  }
+  .reader-close:hover { opacity: 1; border-color: var(--accent); color: var(--accent); transform: rotate(90deg); }
+
+  /* ===== Lenis smooth scroll ===== */
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+  .lenis.lenis-stopped { overflow: clip; }
+  .lenis.lenis-scrolling iframe { pointer-events: none; }
 </style>
+<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
 </head>
 <body>
 <div class="mesh" aria-hidden="true">
@@ -1102,9 +1470,7 @@
     -->
     <a class="navbtn" href="#cv">CV</a>
     <a class="navbtn" href="#art">Portfolio</a>
-    <!-- HIDDEN: Writing nav link. Delete this comment opener and the closing arrow to restore.
     <a class="navbtn" href="#writing">Writing</a>
-    -->
     <a class="navbtn" href="#contact">Contact</a>
   </div>
 </header>
@@ -1379,9 +1745,7 @@
     -->
     <a class="row" href="#pubs"><span class="no">V.</span><span>Publications</span><span class="yr">§ 05</span></a>
     <a class="row" href="#art"><span class="no">VI.</span><span>Art &amp; ephemera</span><span class="yr">§ 06</span></a>
-    <!-- HIDDEN: Writing TOC entry. Delete this comment opener and the closing arrow to restore.
     <a class="row" href="#writing"><span class="no">VII.</span><span>Writing — <em>a blog</em></span><span class="yr">§ 07</span></a>
-    -->
     <a class="row" href="#contact"><span class="no">VIII.</span><span>Correspondence</span><span class="yr">§ 08</span></a>
   </div>
 </section>
@@ -1566,7 +1930,6 @@
   </div>
 </section>
 
-<!-- HIDDEN: Writing/blog section. Delete this comment opener and the closing arrow at the end to restore.
 <section id="writing" data-screen-label="09 Writing">
   <div class="section-hd">
     <div class="no">§ 07 — Writing</div>
@@ -1574,16 +1937,29 @@
     <div class="meta">Essays · dispatches · notes</div>
   </div>
 
-  <div class="writing-list reveal">
-    <a class="post" href="#"><div class="dt">Apr 18 2026</div><div class="t">On the small museum</div><div class="dek">Why a personal website should feel more like a wunderkammer than a résumé.</div><div class="rt">7 min</div></a>
-    <a class="post" href="#"><div class="dt">Mar 02 2026</div><div class="t">A taxonomy of quiet interfaces</div><div class="dek">Five qualities I keep chasing: slowness, legibility, weight, humor, mercy.</div><div class="rt">11 min</div></a>
-    <a class="post" href="#"><div class="dt">Jan 21 2026</div><div class="t">Notes on being a generalist, respectfully</div><div class="dek">Against the cult of the one thing. In favor of adjacent practices.</div><div class="rt">6 min</div></a>
-    <a class="post" href="#"><div class="dt">Dec 09 2025</div><div class="t">Dancing as a research method</div><div class="dek">What the studio taught me about prototypes and the word ‘phrase’.</div><div class="rt">9 min</div></a>
-    <a class="post" href="#"><div class="dt">Nov 04 2025</div><div class="t">Letters I didn’t send</div><div class="dek">On writing drafts as a form of thinking out loud, privately.</div><div class="rt">4 min</div></a>
-    <a class="post" href="#"><div class="dt">Sep 27 2025</div><div class="t">A small syllabus for new investors</div><div class="dek">Books, essays, and a few interviews I keep returning to.</div><div class="rt">12 min</div></a>
+  <!-- Two-column "desk" layout: a small newsletter envelope on the left
+       and the published article list on the right. They share the section
+       so the page reads as one correspondence space — letters going out,
+       letters coming in. -->
+  <div class="writing-grid" id="subscribe">
+    <aside class="writing-mail reveal">
+      <div class="env-eyebrow">the newsletter</div>
+      <h3 class="env-title">the <em>phoebeland</em> letter</h3>
+      <p class="env-blurb">a quiet correspondence —<br/>sent occasionally.</p>
+      <button class="envelope" id="envelope" type="button" aria-label="Open invitation to subscribe">
+        <span class="env-flap"></span>
+        <span class="env-seal" aria-hidden="true">P</span>
+        <span class="env-sr">the phoebeland letter — click to open</span>
+      </button>
+      <p class="env-cta">click to open</p>
+    </aside>
+
+    <div class="writing-list reveal">
+      <div class="writing-list-eyebrow">published letters</div>
+      <a class="post" href="#" data-article-id="small-museum"><div class="dt">Apr 18 2026</div><div class="t">On the small museum</div><div class="dek">Why a personal website should feel more like a wunderkammer than a résumé.</div><div class="rt">7 min</div></a>
+    </div>
   </div>
 </section>
--->
 
 <!-- COLOPHON / CONTACT -->
 <section id="contact" class="colophon" data-screen-label="10 Contact">
@@ -1614,7 +1990,71 @@
   </div>
 </section>
 
+<!-- ===== Newsletter invitation popup (lace-framed card) =====
+     Reuses #lace-h and #lace-v from .lace-frame so the lace style/colour
+     matches the site borders exactly. Top + bottom lace strips extend ~22px
+     past the card edges to read as "cut," same as the site lace is cut by
+     the chrome bar. -->
+<div class="invite-overlay" id="invite-overlay" aria-hidden="true">
+  <div class="invite-card" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+    <button class="invite-close" id="invite-close" type="button" aria-label="Close">×</button>
+    <svg class="invite-lace-ring" id="invite-lace-ring" viewBox="0 0 500 660" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="invite-content">
+      <div class="invite-eyebrow">you are invited</div>
+      <h2 class="invite-title" id="invite-title">the <em>phoebeland</em><br/>letter</h2>
+      <p class="invite-body">a quiet correspondence<br/>on art, work, &amp; the small things<br/>in between.</p>
+      <p class="invite-rsvp">kindly RSVP below</p>
+      <form class="invite-form" id="invite-form" novalidate>
+        <input type="email" name="email" required placeholder="your email" autocomplete="email" aria-label="Email address"/>
+        <button type="submit">yes, please</button>
+      </form>
+      <div class="invite-status" id="invite-status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Article reader overlay ===== -->
+<div class="reader" id="reader" aria-hidden="true">
+  <button class="reader-close" id="reader-close" type="button" aria-label="Close">×</button>
+  <div class="reader-scroll" id="reader-scroll" data-lenis-prevent>
+    <article class="reader-article">
+      <a class="reader-back" id="reader-back">← Back to writing</a>
+      <div class="reader-meta"><span class="reader-date"></span> · <span class="reader-rt"></span></div>
+      <h1 class="reader-title"></h1>
+      <div class="reader-dek"></div>
+      <div class="reader-body"></div>
+      <div class="reader-foot">— Phoebe</div>
+    </article>
+  </div>
+</div>
+
 <script>
+/* ================= LENIS — buttery smooth scroll ================= */
+/* Replaces the browser's wheel/trackpad scroll with an interpolated one.
+   Native scroll events still fire, so the works-pin carousel and other
+   scroll-driven effects keep working without changes. Anchor links are
+   intercepted automatically. Inner scroll containers (e.g. .works-scroll
+   with scroll-snap) are untouched. */
+const lenis = new Lenis({
+  lerp: 0.1,            // 0..1 — lower = smoother but laggier; 0.1 is the sweet spot
+  smoothWheel: true,
+  syncTouch: false,     // keep touch scroll native — Lenis-on-touch feels off on iOS
+  wheelMultiplier: 1,
+  touchMultiplier: 1.2,
+});
+function lenisRaf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(lenisRaf);
+}
+requestAnimationFrame(lenisRaf);
+window.lenis = lenis;   // expose for lightbox start/stop
+
+/* ================= FEATURE TOGGLES ================= */
+/* Flip to true to re-enable the velvet fiber canvas (heavy per-frame paint).
+   The CSS velvet textures + cursor sheen stay on either way — only the
+   per-pixel fiber canvas is gated. */
+const FIBERS_ENABLED = false;
+
 /* ================= CLOCK + LOCATION ================= */
 function pad(n){ return String(n).padStart(2,'0'); }
 /* Edit this to whatever location label you want next to the chrome clock. */
@@ -1838,6 +2278,7 @@ function applyFinish(key) {
   // --- fiber canvas ---
   const canvas = document.getElementById('velvet-fibers');
   if (!canvas) return;
+  if (!FIBERS_ENABLED) { canvas.style.display = 'none'; return; }
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0, DPR = 1;
   let fibers = [];
@@ -2010,11 +2451,13 @@ function applyFinish(key) {
     lb.classList.add('open');
     lb.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    if (window.lenis) window.lenis.stop();
   }
   function closeLB() {
     lb.classList.remove('open');
     lb.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (window.lenis) window.lenis.start();
     // Clear src so the same click reloads cleanly + frees memory
     setTimeout(() => { if (!lb.classList.contains('open')) lbImg.src = ''; }, 250);
   }
@@ -2044,26 +2487,36 @@ function applyFinish(key) {
 })();
 
 /* ============== HERO INTERACTIONS ============== */
-/* Polka dots drift slightly with the cursor — sets --dx / --dy on .hero. */
+/* Polka dots drift slightly with the cursor — sets --dx / --dy on .hero.
+   We lerp current toward target every frame instead of using a CSS
+   transition, so rapid mousemove updates can't restart a half-finished
+   transition (which is what made the dots lurch). Flip HERO_DOTS_PARALLAX
+   to false to make them stationary. */
+const HERO_DOTS_PARALLAX = false;
 (function heroDotsParallax(){
   const hero = document.querySelector('.hero');
-  if (!hero) return;
-  let raf = 0, tx = 0, ty = 0;
+  if (!hero || !HERO_DOTS_PARALLAX) return;
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  let running = false;
+  function loop(){
+    cx += (tx - cx) * 0.08;
+    cy += (ty - cy) * 0.08;
+    hero.style.setProperty('--dx', cx.toFixed(2) + 'px');
+    hero.style.setProperty('--dy', cy.toFixed(2) + 'px');
+    if (Math.abs(tx - cx) < 0.05 && Math.abs(ty - cy) < 0.05) {
+      running = false;
+      return;
+    }
+    requestAnimationFrame(loop);
+  }
+  function kick(){ if (!running) { running = true; requestAnimationFrame(loop); } }
   hero.addEventListener('mousemove', (e) => {
     const r = hero.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width  - 0.5) * 18;  // up to ±9px
-    const y = ((e.clientY - r.top)  / r.height - 0.5) * 14;  // up to ±7px
-    tx = x; ty = y;
-    if (raf) cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      hero.style.setProperty('--dx', tx.toFixed(2) + 'px');
-      hero.style.setProperty('--dy', ty.toFixed(2) + 'px');
-    });
+    tx = ((e.clientX - r.left) / r.width  - 0.5) * 18;  // up to ±9px
+    ty = ((e.clientY - r.top)  / r.height - 0.5) * 14;  // up to ±7px
+    kick();
   }, { passive: true });
-  hero.addEventListener('mouseleave', () => {
-    hero.style.setProperty('--dx', '0px');
-    hero.style.setProperty('--dy', '0px');
-  });
+  hero.addEventListener('mouseleave', () => { tx = 0; ty = 0; kick(); });
 })();
 
 /* Apply locked-in defaults — Miu palette, rosy pink accent, Instrument typography, velvet finish. */
@@ -2077,6 +2530,336 @@ root.style.setProperty('--density', 0.9);
 /* Clear any stale localStorage from the previous in-page Edit feature so it
    can never silently re-mutate the page. */
 try { localStorage.removeItem('phoebe.edits'); } catch(_){}
+
+/* ====================================================================== *
+ *  NEWSLETTER INTEGRATION                                                *
+ * ----------------------------------------------------------------------- *
+ *  How submissions actually reach an email list:                          *
+ *                                                                         *
+ *  Default below is FORMSPREE — easiest for a static site like this.      *
+ *    1. Sign up at https://formspree.io                                   *
+ *    2. Create a new form, copy its endpoint id (e.g. "xpwzelqr")         *
+ *    3. Replace YOUR_FORMSPREE_ID below                                   *
+ *    Subscribers will arrive at the email tied to your Formspree account, *
+ *    where you can export them or forward to a real list provider.        *
+ *                                                                         *
+ *  Alternative: BUTTONDOWN (a clean indie newsletter platform)            *
+ *    Replace endpoint with:                                               *
+ *      'https://buttondown.email/api/emails/embed-subscribe/USERNAME'     *
+ *    AND set NEWSLETTER_MODE = 'buttondown' below — that flips the body   *
+ *    encoding from JSON to form-data which Buttondown expects.            *
+ *                                                                         *
+ *  Alternative: SUBSTACK / MAILCHIMP / CONVERTKIT                         *
+ *    Each has a hosted form URL — point the form's `action` and `method`  *
+ *    attributes at it directly (skip fetch entirely) for the simplest     *
+ *    integration. The fetch path here gives you in-place success state.   *
+ * ====================================================================== */
+const NEWSLETTER_ENDPOINT = 'https://formspree.io/f/YOUR_FORMSPREE_ID';
+const NEWSLETTER_MODE = 'json'; // 'json' for Formspree, 'form' for Buttondown
+
+async function submitNewsletter(email) {
+  if (NEWSLETTER_ENDPOINT.includes('YOUR_')) {
+    console.warn('[newsletter] endpoint not configured — see comment above NEWSLETTER_ENDPOINT in source. Mock-accepting email:', email);
+    await new Promise(r => setTimeout(r, 400));
+    return { ok: true, mock: true };
+  }
+  try {
+    let body, headers;
+    if (NEWSLETTER_MODE === 'form') {
+      body = new FormData();
+      body.append('email', email);
+      headers = { 'Accept': 'application/json' };
+    } else {
+      body = JSON.stringify({ email });
+      headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+    }
+    const r = await fetch(NEWSLETTER_ENDPOINT, { method: 'POST', headers, body });
+    return { ok: r.ok };
+  } catch (err) {
+    return { ok: false, err };
+  }
+}
+
+function wireNewsletterForm(form, statusEl) {
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = form.querySelector('input[type="email"]');
+    const email = (input && input.value || '').trim();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      statusEl.classList.remove('show');
+      statusEl.classList.add('show', 'error');
+      statusEl.textContent = 'enter a valid email';
+      return;
+    }
+    statusEl.classList.remove('error');
+    statusEl.classList.add('show');
+    statusEl.textContent = 'sending…';
+    const res = await submitNewsletter(email);
+    if (res.ok) {
+      statusEl.classList.remove('error');
+      statusEl.textContent = res.mock ? 'thank you (test mode)' : 'thank you — you\'re in';
+      form.reset();
+    } else {
+      statusEl.classList.add('error');
+      statusEl.textContent = 'something went wrong — try again';
+    }
+  });
+}
+
+/* ============== LACE RING (oval invite frame, continuous) ==============
+   Drawn as ONE continuous SVG — not rotated tiles. Like a doily: scallops
+   on the OUTSIDE rim, smooth ellipse on the INSIDE rim.
+     • Outer edge: one scalloped path bumping OUTWARD from centre. Peaks
+       reach the card's elliptical edge.
+     • Body fill: ring shape (outer scalloped path minus inner ellipse),
+       evenodd fill rule.
+     • Inner rim: a single smooth ellipse stroke (doubled).
+     • Decoration: rosettes + beads + mesh ring placed around the ring.
+   Tunable knobs near the top — SCALLOPS / ROSETTES / dip / radii. */
+function buildLaceRing(svg) {
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const NS = 'http://www.w3.org/2000/svg';
+  const cx = 250, cy = 330;          // viewBox is 0 0 500 660
+  const oRx = 240, oRy = 320;        // outer scalloped edge baseline (peaks reach +dip/2 = card edge)
+  const iRx = 175, iRy = 255;        // inner smooth rim radii
+  const dip = 20;                    // depth of each scallop, AWAY from centre
+  const SCALLOPS = 64;
+  const ROSETTES = 14;
+  const INNER_BEADS = 84;
+  const cream = '#f4e4d8';
+
+  const el = (tag, attrs={}, parent=svg) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+    parent.appendChild(e);
+    return e;
+  };
+
+  // Define a rosette once (mirrors the strip-lace rosette exactly), reuse via <use>.
+  const defs = el('defs', {});
+  const rose = el('g', { id: 'invite-rosette' }, defs);
+  el('circle', { r: 1.8, fill: cream }, rose);
+  el('circle', { r: 3.6, fill: 'none', stroke: cream, 'stroke-width': 0.4, opacity: 0.85 }, rose);
+  el('circle', { r: 6.3, fill: 'none', stroke: cream, 'stroke-width': 0.35, opacity: 0.6 }, rose);
+  el('circle', { r: 9.5, fill: 'none', stroke: cream, 'stroke-width': 0.28, opacity: 0.4 }, rose);
+  el('path', {
+    d: 'M0 -9.5 Q1.8 -6 0 -3.5 Q-1.8 -6 0 -9.5 Z M9.5 0 Q6 1.7 3.5 0 Q6 -1.7 9.5 0 Z M0 9.5 Q-1.8 6 0 3.5 Q1.8 6 0 9.5 Z M-9.5 0 Q-6 -1.7 -3.5 0 Q-6 1.7 -9.5 0 Z',
+    fill: cream, opacity: 0.5
+  }, rose);
+  el('path', {
+    d: 'M6.7 -6.7 Q5 -4.5 3.5 -3.5 Q4.5 -5 6.7 -6.7 Z M6.7 6.7 Q4.5 5 3.5 3.5 Q5 4.5 6.7 6.7 Z M-6.7 6.7 Q-5 4.5 -3.5 3.5 Q-4.5 5 -6.7 6.7 Z M-6.7 -6.7 Q-4.5 -5 -3.5 -3.5 Q-5 -4.5 -6.7 -6.7 Z',
+    fill: cream, opacity: 0.4
+  }, rose);
+  el('circle', { cx: 0, cy: -9.5, r: 0.6, fill: cream }, rose);
+  el('circle', { cx: 9.5, cy: 0, r: 0.6, fill: cream }, rose);
+  el('circle', { cx: 0, cy: 9.5, r: 0.6, fill: cream }, rose);
+  el('circle', { cx: -9.5, cy: 0, r: 0.6, fill: cream }, rose);
+  el('path', {
+    d: 'M0 -9.5 V9.5 M-9.5 0 H9.5 M-6.7 -6.7 L6.7 6.7 M-6.7 6.7 L6.7 -6.7',
+    stroke: cream, 'stroke-width': 0.18, opacity: 0.35, fill: 'none'
+  }, rose);
+
+  // Continuous scalloped OUTER edge — one path of N quadratic bumps along
+  // the outer baseline ellipse, each control point pushed AWAY from centre.
+  let sp = '';
+  for (let i = 0; i <= SCALLOPS; i++) {
+    const t = (i / SCALLOPS) * Math.PI * 2;
+    const x = cx + oRx * Math.cos(t);
+    const y = cy + oRy * Math.sin(t);
+    if (i === 0) sp += `M${x.toFixed(2)} ${y.toFixed(2)}`;
+    else {
+      const tm = ((i - 0.5) / SCALLOPS) * Math.PI * 2;
+      const cpx = cx + (oRx + dip) * Math.cos(tm);
+      const cpy = cy + (oRy + dip) * Math.sin(tm);
+      sp += ` Q${cpx.toFixed(2)} ${cpy.toFixed(2)},${x.toFixed(2)} ${y.toFixed(2)}`;
+    }
+  }
+  sp += 'Z';
+
+  // Inner ellipse closed path (used for evenodd ring fill)
+  const ip = `M${cx - iRx} ${cy} A${iRx} ${iRy} 0 1 0 ${cx + iRx} ${cy} A${iRx} ${iRy} 0 1 0 ${cx - iRx} ${cy} Z`;
+
+  // 1. Translucent body fill — ring between scalloped outer path and inner ellipse
+  el('path', { d: sp + ' ' + ip, fill: cream, 'fill-rule': 'evenodd', opacity: 0.18 });
+
+  // 2. Scalloped outer edge — one continuous stroke
+  el('path', { d: sp, fill: 'none', stroke: cream, 'stroke-width': 0.7, opacity: 0.9 });
+
+  // 3. Inner smooth rim — doubled, just like the strip lace
+  el('ellipse', { cx, cy, rx: iRx, ry: iRy, fill: 'none', stroke: cream, 'stroke-width': 0.7, opacity: 0.9 });
+  el('ellipse', { cx, cy, rx: iRx - 3, ry: iRy - 3, fill: 'none', stroke: cream, 'stroke-width': 0.3, opacity: 0.45 });
+
+  // 4. Beads at each scallop peak (inside the bump, near the outer extreme)
+  const peakRx = oRx + dip / 2 - 4;
+  const peakRy = oRy + dip / 2 - 4;
+  for (let i = 0; i < SCALLOPS; i++) {
+    const tm = ((i + 0.5) / SCALLOPS) * Math.PI * 2;
+    el('circle', {
+      cx: (cx + peakRx * Math.cos(tm)).toFixed(2),
+      cy: (cy + peakRy * Math.sin(tm)).toFixed(2),
+      r: 0.85, fill: cream, opacity: 0.85
+    });
+  }
+
+  // 5. Pearl bead ring just outside the inner smooth rim
+  const bRx = iRx + 6, bRy = iRy + 6;
+  for (let i = 0; i < INNER_BEADS; i++) {
+    const t = (i / INNER_BEADS) * Math.PI * 2;
+    el('circle', {
+      cx: (cx + bRx * Math.cos(t)).toFixed(2),
+      cy: (cy + bRy * Math.sin(t)).toFixed(2),
+      r: 0.5, fill: cream, opacity: 0.5
+    });
+  }
+
+  // 6. Faint mesh ring between inner rim and rosette band
+  el('ellipse', { cx, cy, rx: iRx + 13, ry: iRy + 13, fill: 'none', stroke: cream, 'stroke-width': 0.22, opacity: 0.3 });
+
+  // 7. Rosettes — placed at the middle of the ring band
+  const rRx = (oRx + iRx) / 2, rRy = (oRy + iRy) / 2;
+  for (let i = 0; i < ROSETTES; i++) {
+    const t = (i / ROSETTES) * Math.PI * 2 - Math.PI / 2;
+    const px = cx + rRx * Math.cos(t);
+    const py = cy + rRy * Math.sin(t);
+    el('use', {
+      href: '#invite-rosette',
+      transform: `translate(${px.toFixed(2)} ${py.toFixed(2)})`
+    });
+  }
+}
+
+/* ============== NEWSLETTER POPUP ============== */
+(function inviteModal(){
+  const overlay = document.getElementById('invite-overlay');
+  if (!overlay) return;
+  const closeBtn = document.getElementById('invite-close');
+  const form = document.getElementById('invite-form');
+  const status = document.getElementById('invite-status');
+  const ring = document.getElementById('invite-lace-ring');
+
+  buildLaceRing(ring);
+  wireNewsletterForm(form, status);
+
+  function open() {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (window.lenis) window.lenis.stop();
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    if (window.lenis) window.lenis.start();
+    document.body.style.overflow = '';
+    try { localStorage.setItem('phoebeland.newsletter.dismissed', '1'); } catch(_) {}
+  }
+
+  closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+  });
+
+  // TESTING: always show on refresh. Restore the localStorage gate (and the
+  // 8s delay) when we're done iterating on the design.
+  setTimeout(open, 1200);
+
+  // Expose for manual trigger / testing
+  window.openNewsletter = open;
+})();
+
+/* ============== ENVELOPE (newsletter trigger) ==============
+   Clicking the envelope plays its open animation, then opens the popup
+   ~350ms later (timed so the seal fades and the flap finishes lifting
+   before the invitation appears). Re-clickable any time. */
+(function envelopeTrigger(){
+  const env = document.getElementById('envelope');
+  if (!env) return;
+  let opening = false;
+  function open() {
+    if (opening) return;
+    opening = true;
+    env.classList.add('opening');
+    setTimeout(() => {
+      if (typeof window.openNewsletter === 'function') window.openNewsletter();
+    }, 350);
+    setTimeout(() => {
+      env.classList.remove('opening');
+      opening = false;
+    }, 1200);
+  }
+  env.addEventListener('click', open);
+})();
+
+/* ============== ARTICLE READER ============== */
+const articles = {
+  'small-museum': {
+    date: 'Apr 18 2026',
+    rt: '7 min read',
+    title: 'On the small museum',
+    dek: 'Why a personal website should feel more like a wunderkammer than a résumé.',
+    body: `
+      <p>I have been thinking about the difference between a résumé and a cabinet of curiosities. The résumé is a contract: it makes a promise about what you can do, and it lists evidence in support of that promise. The cabinet is something stranger. It admits that you don't know yet what the objects are <em>for</em>. It admits that the value of a thing is sometimes simply that you keep returning to it, that it has, against all professional advice, become part of how you see.</p>
+
+      <p>The personal website, in 2026, has mostly become a résumé. We grade them on conversion rate. We compress them into hero / projects / contact. The bones are the same on every site I open: a thin header, a wall of case studies, a CTA at the bottom. They are extremely effective at communicating that someone is a competent worker. They are extremely bad at communicating that someone is alive.</p>
+
+      <p>I keep wondering what it would look like to build the other thing. A small museum. A wunderkammer. Not a portfolio, exactly — though it can hold the portfolio inside it — but a room arranged by an actual person according to actual taste. A room that doesn't apologize for including, next to the serious work, the sketch on the napkin, the half-finished tool, the essay nobody read, the song that was playing while you wrote the code.</p>
+
+      <blockquote>The cabinet says: here is what I have collected, and the collecting is itself the work.</blockquote>
+
+      <p>This is harder than it sounds. The risk of a wunderkammer is that it becomes self-indulgent: a wall of personal effects with no through-line, beautiful to the maker and inscrutable to anyone else. So you have to build it like a curator, not a hoarder. Each thing has to earn its place. The captions have to be honest. The arrangement has to imply a sensibility, even when it isn't explicit.</p>
+
+      <hr/>
+
+      <p>What I love about the small-museum frame is that it changes what counts as <em>finished</em>. A résumé is finished when every item has a star next to it. A cabinet is finished when the room feels like you. The work of finishing is the work of arranging — pulling some things forward, letting others rest. You can keep a cabinet your whole life. You will never be done with it. That is, I think, the point.</p>
+
+      <p>So I'm going to keep building this site that way. A few rooms, a few drawers. Some objects you walk past. Some you stop at. A small museum, quietly kept.</p>
+    `
+  }
+};
+
+(function reader(){
+  const reader = document.getElementById('reader');
+  if (!reader) return;
+  const closeBtn = document.getElementById('reader-close');
+  const back = document.getElementById('reader-back');
+  const scroll = document.getElementById('reader-scroll');
+
+  function open(id) {
+    const a = articles[id];
+    if (!a) return;
+    reader.querySelector('.reader-date').textContent = a.date;
+    reader.querySelector('.reader-rt').textContent = a.rt;
+    reader.querySelector('.reader-title').textContent = a.title;
+    reader.querySelector('.reader-dek').textContent = a.dek;
+    reader.querySelector('.reader-body').innerHTML = a.body;
+    if (scroll) scroll.scrollTop = 0;
+    reader.classList.add('open');
+    reader.setAttribute('aria-hidden', 'false');
+    if (window.lenis) window.lenis.stop();
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    reader.classList.remove('open');
+    reader.setAttribute('aria-hidden', 'true');
+    if (window.lenis) window.lenis.start();
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.post[data-article-id]').forEach(post => {
+    post.addEventListener('click', (e) => {
+      e.preventDefault();
+      open(post.dataset.articleId);
+    });
+  });
+  closeBtn.addEventListener('click', close);
+  if (back) back.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && reader.classList.contains('open')) close();
+  });
+})();
 </script>
 </body>
 </html>
