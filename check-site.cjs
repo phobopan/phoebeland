@@ -46,7 +46,7 @@ assert(about.includes('https://scholar.google.com/citations?user=ds3ZFjMAAAAJ&am
 assert(!home.includes('id="research"'));
 assert(fs.readFileSync('research.html', 'utf8').includes('url=about.html#links'));
 const myos = fs.readFileSync('myos.html', 'utf8');
-for (const screenshot of ['myos.jpg', 'myos-dashboard.png', 'myos-digest.png']) assert(myos.includes('projects/' + screenshot));
+for (const screenshot of ['myos.webp', 'myos-dashboard.webp', 'myos-digest.webp']) assert(myos.includes('projects/' + screenshot));
 console.log('Passed: page links, project navigation, screenshots, CS and statistics, and research relocation.');
 
 assert(!home.includes('more-work'));
@@ -57,7 +57,7 @@ for (const [id, device] of [['datamatch', 'laptop'], ['aadt', 'phone']]) {
     assert(card.includes('phone-row'));
     assert.equal(new Set([...card.matchAll(/src="([^"]+)"/g)].map(match => match[1])).size, 3);
   }
-  if (id === 'datamatch') assert(card.includes('projects/datamatch.png'));
+  if (id === 'datamatch') assert(card.includes('projects/datamatch.webp'));
 
   assert(home.indexOf(card) > home.indexOf('class="project-rail"'));
   assert(home.indexOf(card) < home.indexOf('</section>'));
