@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" href="favicon.svg?v=pp" type="image/svg+xml">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Harvard College Steelpan Ensemble website: performances, tour coverage, recruitment, and event booking.">
+<meta name="theme-color" content="#ffffff">
+<title>Harvard Steelpan — Phoebe Pan</title>
+<link rel="stylesheet" href="style.css">
+
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="header"><a class="signature" href="index.html">Phoebe Pan</a><nav aria-label="Main navigation"><a href="index.html" aria-current="location">Work</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav></header>
+<main id="main" class="case-study"><a class="back-link" href="index.html#steelpan">← Work</a>
+<header class="case-heading"><h1>Harvard Steelpan</h1><p>A website for the Harvard College Steelpan Ensemble.</p><div class="page-links"><a href="https://harvardcollegesteelpan.com/" target="_blank" rel="noopener">Website ↗</a><a href="https://github.com/phobopan/harvard-college-steelpan-ensemble-website" target="_blank" rel="noopener">GitHub ↗</a></div></header><img class="case-image" src="projects/steelpan.png" alt="Steelpan ensemble website homepage" width="3024" height="1718"><section class="case-text"><h2>Hear the ensemble</h2><div><p>A performance video leads the homepage, with a sound toggle that lets visitors choose when to listen. The media page collects embedded YouTube performances and photographs, while the about page introduces the ensemble’s story, repertoire, and board.</p><p>The Trinidad tour page combines an itinerary, performance coverage, and a photo gallery to document the group’s connection to the instrument’s home.</p></div></section>
+<section class="case-text"><h2>Join or book</h2><div><p>The site supports two main visitor goals: joining the ensemble and booking a performance. Prospective members can find rehearsal information, expand FAQs, and follow a link to the interest form.</p><p>Event organizers can submit a booking inquiry with their date, venue, event type, and budget. The form uses native field validation, a spam honeypot, and a dedicated confirmation page, with submission handling configured through Netlify Forms.</p></div></section>
+<section class="case-text"><h2>Built to stay simple</h2><div><p>Seven static pages use HTML, CSS, and vanilla JavaScript, with no application framework or build step. Shared CSS variables, Grid, and Flexbox keep the visual system consistent across desktop and mobile. A small navigation script handles the mobile menu and Escape-key dismissal.</p><p>Gallery images and performance embeds load lazily. Keyboard focus styles, labeled inputs, skip links, and reduced-motion styles support different ways of navigating the site.</p></div></section>
+<section class="case-text"><h2>Keeping it maintainable</h2><div><p>A Python check validates internal links, page metadata, image descriptions, navigation consistency, and booking-form markup. GitHub Actions runs it on pushes and pull requests. Page-specific titles and descriptions, a sitemap, and social-sharing metadata help visitors find and share the site.</p></div></section>
+</main></body></html>

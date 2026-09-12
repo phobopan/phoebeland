@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" href="favicon.svg?v=pp" type="image/svg+xml">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AIQ: an AI-powered iOS learning app. Phoebe Pan’s work across engineering, product research, and experimentation.">
+<meta name="theme-color" content="#ffffff">
+<title>AIQ — Phoebe Pan</title>
+<link rel="stylesheet" href="style.css?v=phone-fit-2">
+
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="header"><a class="signature" href="index.html">Phoebe Pan</a><nav aria-label="Main navigation"><a href="index.html" aria-current="location">Work</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav></header>
+<main id="main" class="case-study"><a class="back-link" href="index.html#aiq">← Work</a>
+<header class="case-heading"><h1>AIQ</h1><p>Making learning more fun with AI-powered courses, short lessons, and quizzes.</p><a href="https://apps.apple.com/app/id6742797925" target="_blank" rel="noopener">App Store ↗</a></header><div class="case-phones"><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_01_ask.png" alt="Describe a topic and learning goal" width="1320" height="2868" fetchpriority="high"></div></div><figcaption>Ask</figcaption></figure><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_02_path.png" alt="Follow a personalized learning path" width="1320" height="2868" fetchpriority="high"></div></div><figcaption>Learn</figcaption></figure><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_03_duels.png" alt="Race a friend through a course" width="1320" height="2868" fetchpriority="high"></div></div><figcaption>Challenge</figcaption></figure></div>
+<section class="case-text">
+<h2>My role</h2>
+<div>
+<p>I led a team of college students, shipping features and guiding product priorities through customer research and analytics. I also designed and ran Meta ads.</p>
+<p>Built with AI coding tools using Swift, SwiftUI, Supabase, and OpenRouter/OpenAI, with PostHog for product analytics.</p>
+</div>
+</section>
+<section class="case-text">
+<h2>Building the learning experience</h2>
+<div>
+<p>I built a conversational course creator that asks about a learner’s background and goals, then generates a personalized plan and lesson outline.</p>
+<p>To address slow generation, the course map opens once its structure is ready, while lessons generate progressively. Standalone quizzes load two questions first and generate the remaining eight in the background.</p>
+<p>Response validation filters malformed and duplicate questions, then requests only the missing content. Retries simplify question formats when needed, and loading states distinguish ongoing generation from an actual failure.</p>
+</div>
+</section>
+<section class="case-screens" aria-label="More AIQ screens"><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_04_quiz.png" alt="Practice with a quiz" width="1320" height="2868" loading="lazy"></div></div><figcaption>Quizzes</figcaption></figure><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_05_explore.png" alt="Explore community courses" width="1320" height="2868" loading="lazy"></div></div><figcaption>Explore</figcaption></figure><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_06_streak.png" alt="Track a daily learning streak" width="1320" height="2868" loading="lazy"></div></div><figcaption>Streaks</figcaption></figure><figure><div class="phone"><div class="phone-screen phone-screen--marketing"><img src="projects/aiq/aiq_07_profile.png" alt="View progress and achievements" width="1320" height="2868" loading="lazy"></div></div><figcaption>Profile</figcaption></figure></section>
+
+<section class="case-text">
+<h2>Research &amp; experimentation</h2>
+<div>
+<p>A consumer survey revealed strong interest in habit-building features, especially streaks. I used those findings to refocus ad messaging on people already motivated to learn, then monitored ad performance and retention.</p>
+<p>We tested quiz-first and journey-first onboarding flows using PostHog, measuring completion without abandonment and tracking drop-off. The experiment is ongoing; we haven’t decided which flow to adopt.</p>
+</div>
+</section>
+</main></body></html>
